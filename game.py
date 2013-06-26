@@ -199,6 +199,7 @@ def initialize_level_2():
 def keyboard_handler():
     direction = None
 
+    # Determines what direction the user wants to go in, based on the keyboard input
     if KEYBOARD[key.UP]:
         direction = "up"
     if KEYBOARD[key.DOWN]:
@@ -208,11 +209,15 @@ def keyboard_handler():
     if KEYBOARD[key.RIGHT]:
         direction = "right"
 
+    # If they press an arrow key
     if direction:
+        # Determines location for character to move to based on direction
         next_location = PLAYER.next_pos(direction)
         next_x = next_location[0]
         next_y = next_location[1]
 
+        # If the next location is off the board, change the next location to be
+        # at the opposite end of the board
         if next_x < 0:
             next_x = GAME_WIDTH - 1
         elif next_x > GAME_WIDTH - 1:
@@ -223,13 +228,24 @@ def keyboard_handler():
             next_y = 0
             
 
+        # Checks what object (if any) is at the next location of the player
         existing_el = GAME_BOARD.get_el(next_x, next_y)
 
-        # this allows us to reset player to 0,0 after interacting with GreenGem or Chest 
+        # v v v This allows us to reset player to 0,0 after interacting with GreenGem or Chest 
+        
+        # If there is an existing object at the next location of the player,
+        # and that object is either not a Green Gem, not a Chest, or not a Wall,
+        # causes the player to interact with the existing object
         if existing_el and (existing_el.IMAGE != "GreenGem" or existing_el.IMAGE != "Chest" or existing_el.IMAGE != "Wall"):
             existing_el.interact(PLAYER)
 
+        
+        # If there is an existing object at the next location of the player,
+        # and that object is a wall,
         if existing_el and existing_el.IMAGE == "Wall":
+            # If the user wants to move the player up, and that position is on the board, it moves the player
+            # to that location; but if that position is off the board, it resets the position to the opposite
+            # end of the board. Then, if the next position of the WALL is 
             if direction == "up":
                 if next_y - 1 < 0:
                     next_y_wall = GAME_HEIGHT - 1
@@ -239,6 +255,8 @@ def keyboard_handler():
                 if not GAME_BOARD.get_el(next_x, next_y_wall):
                     GAME_BOARD.del_el(next_x, next_y)
                     GAME_BOARD.set_el(next_x, next_y_wall, existing_el)
+                    GAME_BOARD.del_el(PLAYER.x, PLAYER.y)
+                    GAME_BOARD.set_el(next_x, next_y, PLAYER)
             
             elif direction == "down":
                 if next_y + 1 > GAME_HEIGHT - 1:
@@ -249,6 +267,8 @@ def keyboard_handler():
                 if not GAME_BOARD.get_el(next_x, next_y_wall):
                     GAME_BOARD.del_el(next_x, next_y)
                     GAME_BOARD.set_el(next_x, next_y_wall, existing_el)
+                    GAME_BOARD.del_el(PLAYER.x, PLAYER.y)
+                    GAME_BOARD.set_el(next_x, next_y, PLAYER)
             
             elif direction == "right":
                 if next_x + 1 > GAME_WIDTH - 1:
@@ -259,6 +279,8 @@ def keyboard_handler():
                 if not GAME_BOARD.get_el(next_x_wall, next_y):
                     GAME_BOARD.del_el(next_x, next_y)
                     GAME_BOARD.set_el(next_x_wall, next_y, existing_el)
+                    GAME_BOARD.del_el(PLAYER.x, PLAYER.y)
+                    GAME_BOARD.set_el(next_x, next_y, PLAYER)
             else:
                 if next_x - 1 < 0:
                     next_x_wall = GAME_WIDTH - 1
@@ -268,8 +290,8 @@ def keyboard_handler():
                 if not GAME_BOARD.get_el(next_x_wall, next_y):
                     GAME_BOARD.del_el(next_x, next_y)
                     GAME_BOARD.set_el(next_x_wall, next_y, existing_el)
-            GAME_BOARD.del_el(PLAYER.x, PLAYER.y)
-            GAME_BOARD.set_el(next_x, next_y, PLAYER)
+                    GAME_BOARD.del_el(PLAYER.x, PLAYER.y)
+                    GAME_BOARD.set_el(next_x, next_y, PLAYER)
 
         if existing_el is None or not existing_el.SOLID:
             # If there's nothing there or if the existing element is 
