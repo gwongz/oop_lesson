@@ -9,10 +9,10 @@ GAME_BOARD = None
 DEBUG = False
 KEYBOARD = None
 PLAYER = None
-######################
+#######################
 
-GAME_WIDTH = 5
-GAME_HEIGHT = 5
+GAME_WIDTH = 10
+GAME_HEIGHT = 10
 
 #### Put class definitions here ####
 
