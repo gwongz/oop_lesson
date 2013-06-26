@@ -196,6 +196,10 @@ def initialize_level_2():
     GAME_BOARD.register(wall)
     GAME_BOARD.set_el(6, 3, wall)
 
+    wall_2 = Wall()
+    GAME_BOARD.register(wall_2)
+    GAME_BOARD.set_el(6, 2, wall_2)
+
 def keyboard_handler():
     direction = None
 
@@ -253,10 +257,8 @@ def keyboard_handler():
                     next_y_wall = next_y - 1
 
                 if not GAME_BOARD.get_el(next_x, next_y_wall):
-                    GAME_BOARD.del_el(next_x, next_y)
-                    GAME_BOARD.set_el(next_x, next_y_wall, existing_el)
-                    GAME_BOARD.del_el(PLAYER.x, PLAYER.y)
-                    GAME_BOARD.set_el(next_x, next_y, PLAYER)
+                    move_el(next_x, next_y, next_x, next_y_wall, existing_el)
+                    move_el(PLAYER.x, PLAYER.y, next_x, next_y, PLAYER)
             
             elif direction == "down":
                 if next_y + 1 > GAME_HEIGHT - 1:
@@ -265,10 +267,8 @@ def keyboard_handler():
                     next_y_wall = next_y + 1
 
                 if not GAME_BOARD.get_el(next_x, next_y_wall):
-                    GAME_BOARD.del_el(next_x, next_y)
-                    GAME_BOARD.set_el(next_x, next_y_wall, existing_el)
-                    GAME_BOARD.del_el(PLAYER.x, PLAYER.y)
-                    GAME_BOARD.set_el(next_x, next_y, PLAYER)
+                    move_el(next_x, next_y, next_x, next_y_wall, existing_el)
+                    move_el(PLAYER.x, PLAYER.y, next_x, next_y, PLAYER)
             
             elif direction == "right":
                 if next_x + 1 > GAME_WIDTH - 1:
@@ -277,10 +277,8 @@ def keyboard_handler():
                     next_x_wall = next_x + 1
 
                 if not GAME_BOARD.get_el(next_x_wall, next_y):
-                    GAME_BOARD.del_el(next_x, next_y)
-                    GAME_BOARD.set_el(next_x_wall, next_y, existing_el)
-                    GAME_BOARD.del_el(PLAYER.x, PLAYER.y)
-                    GAME_BOARD.set_el(next_x, next_y, PLAYER)
+                    move_el(next_x, next_y, next_x_wall, next_y, existing_el)
+                    move_el(PLAYER.x, PLAYER.y, next_x, next_y, PLAYER)
             else:
                 if next_x - 1 < 0:
                     next_x_wall = GAME_WIDTH - 1
@@ -288,10 +286,8 @@ def keyboard_handler():
                     next_x_wall = next_x - 1
 
                 if not GAME_BOARD.get_el(next_x_wall, next_y):
-                    GAME_BOARD.del_el(next_x, next_y)
-                    GAME_BOARD.set_el(next_x_wall, next_y, existing_el)
-                    GAME_BOARD.del_el(PLAYER.x, PLAYER.y)
-                    GAME_BOARD.set_el(next_x, next_y, PLAYER)
+                    move_el(next_x, next_y, next_x_wall, next_y, existing_el)
+                    move_el(PLAYER.x, PLAYER.y, next_x, next_y, PLAYER)
 
         if existing_el is None or not existing_el.SOLID:
             # If there's nothing there or if the existing element is 
@@ -301,6 +297,13 @@ def keyboard_handler():
 
         if existing_el and (existing_el.IMAGE == "GreenGem" or existing_el.IMAGE == "Chest"):
             existing_el.interact(PLAYER)
+
+# deletes element at x,y and resets it at the next position 
+def move_el(x, y, next_x, next_y, piece):
+    GAME_BOARD.del_el(x,y)
+    GAME_BOARD.set_el(next_x, next_y, piece)
+
+
 
 def clear_board():
     for x in range(GAME_WIDTH):
