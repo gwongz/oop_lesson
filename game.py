@@ -11,8 +11,8 @@ KEYBOARD = None
 PLAYER = None
 #######################
 
-GAME_WIDTH = 10
-GAME_HEIGHT = 10
+GAME_WIDTH = 7
+GAME_HEIGHT = 7
 
 #### Put class definitions here ####
 
@@ -46,6 +46,18 @@ class Boy(Character):
     def interact(self, player):
         GAME_BOARD.draw_msg("Hey, girl. There is a bad gem on the board.")
 
+class Chest(GameElement):
+    IMAGE = "Chest"
+    SOLID = False
+
+    # Make things happen when you interact with chest 
+    def interact(self, player):
+        GAME_BOARD.draw_msg("Congratulations! You move on to the next level!")
+        clear_board()
+        initialize_level_2()
+
+
+
 class Door(GameElement):
     IMAGE = "DoorClosed"
     SOLID = True
@@ -61,16 +73,24 @@ class Gem(GameElement):
     SOLID = False 
 
     def interact(self, player):
-        player.inventory.append(self)
 
         if self.IMAGE == "GreenGem":
             GAME_BOARD.draw_msg("This is a bad gem.")
+            clear_board()
+            initialize()
             # GAME_BOARD.del_el(PLAYER.x, PLAYER.y)
             # GAME_BOARD.set_el(0, 0, PLAYER)
             # print PLAYER.x, PLAYER.y
-        
         else: 
-            GAME_BOARD.draw_msg("You just acquired a gem! You have %d items!" % (len(player.inventory)))
+            player.inventory.append(self)
+            GAME_BOARD.draw_msg("You just acquired a gem! You have %d gems!" % (len(player.inventory)))
+
+            if len(player.inventory) == 5:
+                # Initialize first object "chest" of class "Chest" and set it on GAME_BOARD
+                chest = Chest()
+                GAME_BOARD.register(chest)
+                GAME_BOARD.set_el(5, 5, chest)
+        
 
 class Key(GameElement):
     IMAGE = "Key"
@@ -82,9 +102,17 @@ class Key(GameElement):
 
         GAME_BOARD.draw_msg("THIS KEY IS ALL YOU NEED!!!!!!111!!!!")
 
+class Princess(GameElement):
+    IMAGE = "Princess"
+    SOLID = True
+
 class Rock(GameElement): 
     IMAGE = "Rock"
     SOLID = True
+
+class Wall(GameElement):
+    IMAGE = "Wall"
+    SOLID = True 
 
 ####   End class definitions    ####
 
@@ -124,11 +152,24 @@ def initialize():
     GAME_BOARD.register(door)
     GAME_BOARD.set_el(3,2,door)
 
-    # Register gems
+    # Register good gems
     gem = Gem()
     GAME_BOARD.register(gem)
     GAME_BOARD.set_el(3,1,gem)
 
+    gem2 = Gem()
+    GAME_BOARD.register(gem)
+    GAME_BOARD.set_el(4,4, gem)
+
+    gem3 = Gem()
+    GAME_BOARD.register(gem)
+    GAME_BOARD.set_el(1,6,gem)
+
+    gem4 = Gem()
+    GAME_BOARD.register(gem)
+    GAME_BOARD.set_el(0,5,gem)
+
+    # Register bad gem
     green_gem = Gem()
     green_gem.IMAGE = "GreenGem"
     GAME_BOARD.register(green_gem)
@@ -139,6 +180,21 @@ def initialize():
     GAME_BOARD.register(key)
     GAME_BOARD.set_el(3, 3, key)
 
+
+def initialize_level_2():
+
+    # Adds chest and princess on empty game board at start of level 2
+    chest_2 = Chest()
+    GAME_BOARD.register(chest_2)
+    GAME_BOARD.set_el(4, 3, chest_2)
+
+    princess = Princess()
+    GAME_BOARD.register(princess)
+    GAME_BOARD.set_el(5, 3, princess)
+
+    wall = Wall()
+    GAME_BOARD.register(wall)
+    GAME_BOARD.set_el(6, 3, wall)
 
 def keyboard_handler():
     direction = None
@@ -169,12 +225,66 @@ def keyboard_handler():
 
         existing_el = GAME_BOARD.get_el(next_x, next_y)
 
-        if existing_el:
+        # this allows us to reset player to 0,0 after interacting with GreenGem or Chest 
+        if existing_el and (existing_el.IMAGE != "GreenGem" or existing_el.IMAGE != "Chest" or existing_el.IMAGE != "Wall"):
             existing_el.interact(PLAYER)
 
-        if existing_el is None or not existing_el.SOLID:
-            # If there's nothing there or if the existing element is 
-            # not solid, walk through
+        if existing_el and existing_el.IMAGE == "Wall":
+            if direction == "up":
+                if next_y - 1 < 0:
+                    next_y_wall = GAME_HEIGHT - 1
+                else:
+                    next_y_wall = next_y - 1
+
+                if not GAME_BOARD.get_el(next_x, next_y_wall):
+                    GAME_BOARD.del_el(next_x, next_y)
+                    GAME_BOARD.set_el(next_x, next_y_wall, existing_el)
+            
+            elif direction == "down":
+                if next_y + 1 > GAME_HEIGHT - 1:
+                    next_y_wall = 0
+                else:
+                    next_y_wall = next_y + 1
+
+                if not GAME_BOARD.get_el(next_x, next_y_wall):
+                    GAME_BOARD.del_el(next_x, next_y)
+                    GAME_BOARD.set_el(next_x, next_y_wall, existing_el)
+            
+            elif direction == "right":
+                if next_x + 1 > GAME_WIDTH - 1:
+                    next_x_wall = 0
+                else:
+                    next_x_wall = next_x + 1
+
+                if not GAME_BOARD.get_el(next_x_wall, next_y):
+                    GAME_BOARD.del_el(next_x, next_y)
+                    GAME_BOARD.set_el(next_x_wall, next_y, existing_el)
+            else:
+                if next_x - 1 < 0:
+                    next_x_wall = GAME_WIDTH - 1
+                else:
+                    next_x_wall = next_x - 1
+
+                if not GAME_BOARD.get_el(next_x_wall, next_y):
+                    GAME_BOARD.del_el(next_x, next_y)
+                    GAME_BOARD.set_el(next_x_wall, next_y, existing_el)
             GAME_BOARD.del_el(PLAYER.x, PLAYER.y)
             GAME_BOARD.set_el(next_x, next_y, PLAYER)
 
+        if existing_el is None or not existing_el.SOLID:
+            # If there's nothing there or if the existing element is 
+            # not solid, or if the images is not a Wall,then walk through
+            GAME_BOARD.del_el(PLAYER.x, PLAYER.y)
+            GAME_BOARD.set_el(next_x, next_y, PLAYER)
+
+        if existing_el and (existing_el.IMAGE == "GreenGem" or existing_el.IMAGE == "Chest"):
+            existing_el.interact(PLAYER)
+
+def clear_board():
+    for x in range(GAME_WIDTH):
+        for y in range(GAME_HEIGHT):
+            if GAME_BOARD.get_el(x, y):
+                GAME_BOARD.del_el(x, y)
+
+    GAME_BOARD.del_el(PLAYER.x, PLAYER.y)
+    GAME_BOARD.set_el(0, 0, PLAYER)
