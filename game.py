@@ -52,9 +52,14 @@ class Chest(GameElement):
 
     # Make things happen when you interact with chest 
     def interact(self, player):
-        GAME_BOARD.draw_msg("Congratulations! You move on to the next level!")
-        clear_board()
-        initialize_level_2()
+        print self
+        if self == chest:
+            GAME_BOARD.draw_msg("Congratulations! You move on to the next level!")
+            clear_board()
+            initialize_level_2()
+        elif self == chest_2:
+            clear_board()
+        
 
 
 
@@ -65,7 +70,7 @@ class Door(GameElement):
     def interact(self, player):
         for item in player.inventory:
             if item.IMAGE == "Key":
-                door.SOLID = False
+                self.SOLID = False
                 break
 
 class Gem(GameElement):
@@ -78,15 +83,13 @@ class Gem(GameElement):
             GAME_BOARD.draw_msg("This is a bad gem.")
             clear_board()
             initialize()
-            # GAME_BOARD.del_el(PLAYER.x, PLAYER.y)
-            # GAME_BOARD.set_el(0, 0, PLAYER)
-            # print PLAYER.x, PLAYER.y
         else: 
             player.inventory.append(self)
             GAME_BOARD.draw_msg("You just acquired a gem! You have %d gems!" % (len(player.inventory)))
 
             if len(player.inventory) == 5:
                 # Initialize first object "chest" of class "Chest" and set it on GAME_BOARD
+                global chest 
                 chest = Chest()
                 GAME_BOARD.register(chest)
                 GAME_BOARD.set_el(5, 5, chest)
@@ -98,13 +101,12 @@ class Key(GameElement):
 
     def interact(self, player):
         player.inventory.append(self)
-        # door.SOLID = False
 
-        GAME_BOARD.draw_msg("THIS KEY IS ALL YOU NEED!!!!!!111!!!!")
+        GAME_BOARD.draw_msg("THIS KEY IS ALL YOU NEED!!!!!!!!!!")
 
 class Princess(GameElement):
     IMAGE = "Princess"
-    SOLID = True
+    SOLID = False
 
 class Rock(GameElement): 
     IMAGE = "Rock"
@@ -147,7 +149,6 @@ def initialize():
     GAME_BOARD.draw_msg("This game is wicked awesome.")
 
     # Register door
-    global door 
     door = Door()
     GAME_BOARD.register(door)
     GAME_BOARD.set_el(3,2,door)
@@ -184,21 +185,44 @@ def initialize():
 def initialize_level_2():
 
     # Adds chest and princess on empty game board at start of level 2
+    
+    rock_positions = [(3, 1), (4, 1), (5, 1), (6, 1), (6, 2), (3, 3), (4, 3), (5, 3), 
+    (6, 3), (0, 6), (1, 6), (2, 6), (3, 6), (4, 6), (5, 6), (6, 6)]
+    rocks = []
+
+    for pos in rock_positions:
+        rock = Rock()
+        GAME_BOARD.register(rock)
+        GAME_BOARD.set_el(pos[0], pos[1], rock)
+        rocks.append(rock)
+
+    global chest_2
     chest_2 = Chest()
     GAME_BOARD.register(chest_2)
-    GAME_BOARD.set_el(4, 3, chest_2)
+    GAME_BOARD.set_el(4, 2, chest_2)
 
     princess = Princess()
     GAME_BOARD.register(princess)
-    GAME_BOARD.set_el(5, 3, princess)
+    GAME_BOARD.set_el(5, 2, princess)
 
-    wall = Wall()
-    GAME_BOARD.register(wall)
-    GAME_BOARD.set_el(6, 3, wall)
+    wall_positions = [(0, 3), (1, 3), (2, 3)]
+    walls = []
 
-    wall_2 = Wall()
-    GAME_BOARD.register(wall_2)
-    GAME_BOARD.set_el(6, 2, wall_2)
+    for pos in wall_positions:
+        wall = Wall()
+        GAME_BOARD.register(wall)
+        GAME_BOARD.set_el(pos[0], pos[1], wall)
+        walls.append(wall)
+
+    door_2 = Door()
+    GAME_BOARD.register(door_2)
+    GAME_BOARD.set_el(3,2, door_2)
+
+    key = Key()
+    GAME_BOARD.register(key)
+    GAME_BOARD.set_el(1,5, key)
+
+    GAME_BOARD.erase_msg()
 
 def keyboard_handler():
     direction = None
